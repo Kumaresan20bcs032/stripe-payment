@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stripe Payment</title>
+    <style>
+        .form {
+            margin-top: 15%;
+        }
+
+        .container {
+            width: 80%;
+            margin: auto;
+        }
+
+        .card {
+            font-size: 20px;
+            font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="form">
+        <center class="heading">
+            <h1>Make payment</h1>
+        </center>
+
+        <form action="#">
+            <div class="container">
+                <div>
+                    <label for="card-element" class="card">Accepted Only Indian Card</label>
+                    <hr>
+                    <div id="card-element"></div>
+                </div>
+                <br>
+                <div>
+                    <button class="card" onclick="stripePayment(event)">Make Payment</button>
+                </div>
+            </div>
+
+        </form>
+    </div>
+    <script src="https://js.stripe.com/v3/"></script>
+    <script>
+        const stripe = Stripe('pk_test_51PLMmCSHhqVptSW1v5m3BWdEg0LHRk5yiEaaiIAQ0jfWx1pxiOTyH165POJDzf4rfYpypKHpfJ3e3tckQGHJfExV00KFcCybUY')
+        var elements = stripe.elements()
+        var cardElement = elements.create('card')
+        cardElement.mount('#card-element')
+
+        async function stripePayment(event) {
+            console.log('payment started.....')
+            event.preventDefault()
+            const paymentintent = await fetch('api/payment/v1/stripe', {
+                method: 'POST'
+            })
+
+            const response = await paymentintent.json()
+            // console.log(response)
+            const clientSecret = response.data.client_secret
+            // console.log(response.data)
+            // console.log(clientSecret)
+            const { paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+                payment_method: {
+                    card: cardElement
+                }
+            })
+
+            const _status = paymentIntent.status
+
+            if (_status === 'succeeded') {
+                alert('your payment successful')
+            }
+            else {
+                alert('payment failed due to some reason!')
+            }
+        }
+    </script>
+</body>
+
+</html>
