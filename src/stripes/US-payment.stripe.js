@@ -8,10 +8,13 @@ export const makePayment = async (req, res) => {
     try {
         const paymentIntent = await stripe.paymentIntents.create({
             amount: 2000,
-            currency: 'inr',
-            payment_method_types: [
-                "card"
-            ]
+            currency: 'usd',
+            payment_method: 'pm_card_us',
+            confirm: true,
+            automatic_payment_methods: {
+                enabled: true,
+                allow_redirects: 'never'
+            }
         })
         return response.sendSuccess(res, 201, 'paymentIntent is sended to complete required-payment', paymentIntent)
     }
